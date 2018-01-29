@@ -1,0 +1,92 @@
+{
+  "name": "Graph Generator",
+
+  "namespace": "Vanderbilt\\GraphGeneratorExternalModule",
+
+  "authors": [
+    {
+      "name": "Eva Bascompte Moragas",
+      "email": "datacore@vanderbilt.edu",
+      "institution": "Vanderbilt University Medical Center"
+    }
+  ],
+
+  "permissions": [
+    "hook_save_record"
+  ],
+
+  "description": "Generated a Graph Image and saves it in a variable",
+
+  "project-settings": [
+    {
+      "key": "graph-title",
+      "name": "Title on the image graph",
+      "type": "text"
+    },
+    {
+      "key": "graph-format",
+      "name": "Image Format",
+      "choices":[
+        {
+          "name" : "PNG",
+          "value" : "png"
+        },
+        {
+          "name" : "JPEG",
+          "value" : "jpeg"
+        }
+      ],
+      "type": "radio"
+    },
+    {
+      "key": "graph-parameters",
+      "name": "RedCap variables with parameter values.<br>Separated by comma",
+      "type": "textarea"
+    },
+    {
+      "key": "graph-text",
+      "name": "Text matching with parameter values.<br>Separated by comma",
+      "type": "textarea"
+    },
+    {
+      "key": "graph-color",
+      "name": "Color bars matching with parameter values.<br>Separated by comma",
+      "type": "textarea"
+    },
+    {
+      "key": "graph-right-label",
+      "name": "Text displayed on the right",
+      "type": "text"
+    },
+    {
+      "key": "graph-left-label",
+      "name": "Text displayed on the left",
+      "type": "text"
+    },
+    {
+      "key": "graph-saveto",
+      "name": "Field name to store the graph",
+      "type": "text"
+    },
+    {
+      "key": "graph-band",
+      "name": "Band position. Format: bottom,top",
+      "type": "text"
+    },
+    {
+      "key": "graph-yaxis-min",
+      "name": "Min yaxis",
+      "type": "text"
+    },
+    {
+      "key": "graph-yaxis-max",
+      "name": "Max yaxis",
+      "type": "text"
+    },
+    {
+      "key": "graph-yaxis-increments",
+      "name": "yaxis increments",
+      "type": "text"
+    }
+  ]
+}
