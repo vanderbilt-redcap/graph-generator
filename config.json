@@ -19,6 +19,13 @@
 
   "project-settings": [
     {
+      "key": "survey-form",
+      "name": "Survey to Screen With",
+      "required": true,
+      "type": "form-list",
+      "repeatable": true
+    },
+    {
       "key": "graph-title",
       "name": "Title on the image graph",
       "type": "text"

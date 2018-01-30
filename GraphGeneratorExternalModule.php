@@ -12,29 +12,34 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
 	function hook_save_record($project_id, $record, $instrument, $event_id){
 
-        $graph_title = $this->getProjectSetting("graph-title",$project_id);
-        $graph_parameters = $this->getProjectSetting("graph-parameters",$project_id);
+        $survey_form = $this->getProjectSetting("survey-form",$project_id);
 
-        $graph_parameters = preg_split("/[;,]+/", $graph_parameters);
+        //If we are in the correct instrument
+        if ($survey_form && in_array($instrument,$survey_form)) {
+            $graph_title = $this->getProjectSetting("graph-title", $project_id);
+            $graph_parameters = $this->getProjectSetting("graph-parameters", $project_id);
+
+            $graph_parameters = preg_split("/[;,]+/", $graph_parameters);
 
 
-        $data = \REDCap::getData($project_id, 'array', $record);
-        $all_data_array = array();
-        $all_data = true;
-        foreach ($graph_parameters as $param){
-            $var_name = str_replace('[', '', trim($param));
-            $var_name = str_replace(']', '', $var_name);
+            $data = \REDCap::getData($project_id, 'array', $record);
+            $all_data_array = array();
+            $all_data = true;
+            foreach ($graph_parameters as $param) {
+                $var_name = str_replace('[', '', trim($param));
+                $var_name = str_replace(']', '', $var_name);
 
-            if($data[$record][$event_id][$var_name] != ""){
-                array_push($all_data_array,$data[$record][$event_id][$var_name]);
-            }else{
-                $all_data = false;
-                break;
+                if ($data[$record][$event_id][$var_name] != "") {
+                    array_push($all_data_array, $data[$record][$event_id][$var_name]);
+                } else {
+                    $all_data = false;
+                    break;
+                }
             }
-        }
 
-        if($all_data){
-            $this->generate_graph($project_id,$record,$event_id,$graph_title,$all_data_array);
+            if ($all_data) {
+                $this->generate_graph($project_id, $record, $event_id, $graph_title, $all_data_array);
+            }
         }
 	}
 
@@ -80,7 +85,14 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
         // Slightly bigger margins than default to make room for titles
         $graph->SetMargin(50,60,30,25);
-        $graph->SetMarginColor('white');
+
+        //To set the image background transparent
+        $graph->SetMarginColor('White:0.6');
+        $graph->SetFrame(true,'White:0.6',1);
+        $graph->SetBox(false);
+        if($graph_format == "png"){
+            $graph->img->SetTransparent("white");
+        }
 
         // Setup the scales for X,Y and Y2 axis
         $graph->SetScale("textlin"); // X and Y axis
@@ -100,9 +112,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
 
         // Title for X-axis
-//        $graph->xaxis->title->Set('Measurement');
-//        $graph->xaxis->title->SetMargin(5);
-//        $graph->xaxis->title->SetFont(FF_ARIAL,FS_NORMAL,11);
         $graph->xaxis->SetTickLabels($graph_text);
 
         $bplot->SetColor('black');
@@ -156,7 +165,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $bplot->value->SetFont(FF_ARIAL,FS_BOLD);
         $bplot->value->SetColor("black");
         // Center the values in the bar
-//        $bplot->SetValuePos('center');
+        //$bplot->SetValuePos('center');
 
         //SAVE IMAGE TO DB
         $graph->img->SetImgFormat($graph_format);
@@ -167,10 +176,10 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $img_data = ob_get_contents();
         ob_end_clean();
 
-        echo '<img src="data:image/png;base64,';
-        echo base64_encode($img_data);
-        echo '"/>';
-        die;
+//        echo '<img src="data:image/png;base64,';
+//        echo base64_encode($img_data);
+//        echo '"/>';
+//        die;
 
         //Save image to DB
         $this->saveToFieldName($project_id, $record, $event_id, $img_data,$graph_format);
