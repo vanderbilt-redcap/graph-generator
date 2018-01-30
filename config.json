@@ -31,16 +31,16 @@
       "type": "text"
     },
     {
-      "key": "graph-format",
-      "name": "Image Format",
+      "key": "graph-background",
+      "name": "Image Background",
       "choices":[
         {
-          "name" : "PNG",
-          "value" : "png"
+          "name" : "Transparent",
+          "value" : "trans"
         },
         {
-          "name" : "JPEG",
-          "value" : "jpeg"
+          "name" : "White",
+          "value" : "white"
         }
       ],
       "type": "radio"

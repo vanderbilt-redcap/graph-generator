@@ -46,7 +46,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
     function generate_graph($project_id,$record,$event_id,$graph_title,$all_data_array){
         $graph_text = $this->getProjectSetting("graph-text",$project_id);
         $graph_color = $this->getProjectSetting("graph-color",$project_id);
-        $graph_format = $this->getProjectSetting("graph-format",$project_id);
+        $graph_background = $this->getProjectSetting("graph-background",$project_id);
         $graph_right_label = $this->getProjectSetting("graph-right-label",$project_id);
         $graph_left_label = $this->getProjectSetting("graph-left-label",$project_id);
         $graph_band = $this->getProjectSetting("graph-band",$project_id);
@@ -61,12 +61,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $count = 0;
         $positions_array = array();
         for ($position = $graph_yaxis_min; $position <=$graph_yaxis_max; $position+=$graph_yaxis_increments){
-            //Start on 1
-//            if($position == 0){
-//                array_push($positions_array,1);
-//            }else{
-                array_push($positions_array,$position);
-//            }
+            array_push($positions_array,$position);
         }
         if(!in_array ($graph_yaxis_max,$positions_array)){
             array_push($positions_array,$graph_yaxis_max);
@@ -90,7 +85,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $graph->SetMarginColor('White:0.6');
         $graph->SetFrame(true,'White:0.6',1);
         $graph->SetBox(false);
-        if($graph_format == "png"){
+        if($graph_background == "trans"){
             $graph->img->SetTransparent("white");
         }
 
@@ -168,7 +163,9 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         //$bplot->SetValuePos('center');
 
         //SAVE IMAGE TO DB
-        $graph->img->SetImgFormat($graph_format);
+//        $graph->img->SetImgFormat($graph_format);
+
+
         $img = $graph->Stroke(_IMG_HANDLER);
         ob_start();
 
@@ -182,7 +179,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 //        die;
 
         //Save image to DB
-        $this->saveToFieldName($project_id, $record, $event_id, $img_data,$graph_format);
+        $this->saveToFieldName($project_id, $record, $event_id, $img_data,"png");
     }
 
     function scaleTicks($max_data){
