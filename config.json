@@ -46,6 +46,11 @@
       "type": "radio"
     },
     {
+      "key": "graph-size",
+      "name": "Image size (W,H). By default is 750x750 pixels",
+      "type": "text"
+    },
+    {
       "key": "graph-parameters",
       "name": "RedCap variables with parameter values.<br>Separated by comma",
       "type": "textarea"

@@ -50,9 +50,11 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $graph_right_label = $this->getProjectSetting("graph-right-label",$project_id);
         $graph_left_label = $this->getProjectSetting("graph-left-label",$project_id);
         $graph_band = $this->getProjectSetting("graph-band",$project_id);
+        $graph_size = $this->getProjectSetting("graph-size",$project_id);
 
         $graph_text = preg_split("/[;,]+/", $graph_text);
         $graph_color = preg_split("/[;,]+/", $graph_color);
+        $graph_size = preg_split("/[;,]+/", $graph_size);
 
         $graph_yaxis_min = $this->getProjectSetting("graph-yaxis-min",$project_id);
         $graph_yaxis_max = $this->getProjectSetting("graph-yaxis-max",$project_id);
@@ -75,7 +77,9 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         }
 
         // Create the graph.
-        $graph = new \Graph(400,420);
+        $w = ($graph_size[0] == "")? 750:$graph_size[0];
+        $h = ($graph_size[1] == "")? 750:$graph_size[1];
+        $graph = new \Graph($w,$h);
 
         // Slightly bigger margins than default to make room for titles
         $graph->SetMargin(50,60,30,25);
@@ -172,10 +176,10 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $img_data = ob_get_contents();
         ob_end_clean();
 
-//        echo '<img src="data:image/png;base64,';
-//        echo base64_encode($img_data);
-//        echo '"/>';
-//        die;
+        echo '<img src="data:image/png;base64,';
+        echo base64_encode($img_data);
+        echo '"/>';
+        die;
 
         //Save image to DB
         $this->saveToFieldName($project_id, $record, $event_id, $img_data,"png");
