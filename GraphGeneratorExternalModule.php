@@ -67,7 +67,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
             array_push($positions_array,$graph_yaxis_max);
         }
 
-        $all_data_array = array(99,20,44);
         $max_data = max($all_data_array);
         if($max_data <= 100){
             $scale = $this->scaleTicks($max_data);
