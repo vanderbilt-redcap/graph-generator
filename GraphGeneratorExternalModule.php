@@ -82,7 +82,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $graph = new \Graph($w,$h);
 
         // Slightly bigger margins than default to make room for titles
-        $graph->SetMargin(50,60,30,25);
+        $graph->SetMargin(50,60,30,30);
 
         //To set the image background transparent
         $graph->SetMarginColor('White:0.6');
@@ -101,7 +101,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
         //Main title
         $graph->title->Set($graph_title);
-        $graph->title->SetFont(FF_ARIAL,FS_BOLD,12);
+        $graph->title->SetFont(FF_ARIAL,FS_BOLD,16);
 
         // Create the bar plots
         $bplot = new \BarPlot($all_data_array);
@@ -110,7 +110,11 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
 
         // Title for X-axis
+        //        $graph->xaxis->title->Set('Measurement');
+//        $graph->xaxis->title->SetMargin(5);
+//        $graph->xaxis->title->SetFont(FF_ARIAL,FS_NORMAL,11);
         $graph->xaxis->SetTickLabels($graph_text);
+        $graph->xaxis->SetFont(FF_ARIAL,FS_NORMAL,15);
 
         $bplot->SetColor('black');
         $graph->graph_theme = null;
@@ -118,7 +122,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         // Title for Y-axis
         $graph->yaxis->title->Set($graph_left_label);
         $graph->yaxis->title->SetMargin(5);
-        $graph->yaxis->title->SetFont(FF_ARIAL,FS_NORMAL,11);
+        $graph->yaxis->title->SetFont(FF_ARIAL,FS_NORMAL,15);
         $graph->yaxis->SetTickPositions($positions_array);
 
 
@@ -129,7 +133,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         if($graph_right_label != ""){
             // Create Y2 scale data set
             $graph->y2axis->title->Set($graph_right_label);
-            $graph->y2axis->title->SetFont(FF_ARIAL,FS_NORMAL,8);
+            $graph->y2axis->title->SetFont(FF_ARIAL,FS_NORMAL,15);
             $graph->y2axis->SetColor('#d8ecf3@1.0:1.3');
             //We scale this axis to hide the extra bars
             $graph->y2axis->scale->SetGrace($scale);
@@ -160,7 +164,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         // Setup the values that are displayed on top of each bar
         $bplot->value->Show();
         $bplot->value->SetFormat('%d');
-        $bplot->value->SetFont(FF_ARIAL,FS_BOLD);
+        $bplot->value->SetFont(FF_ARIAL,FS_BOLD,16);
         $bplot->value->SetColor("black");
         // Center the values in the bar
         //$bplot->SetValuePos('center');
@@ -176,10 +180,10 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $img_data = ob_get_contents();
         ob_end_clean();
 
-//        echo '<img src="data:image/png;base64,';
-//        echo base64_encode($img_data);
-//        echo '"/>';
-//        die;
+        echo '<img src="data:image/png;base64,';
+        echo base64_encode($img_data);
+        echo '"/>';
+        die;
 
         //Save image to DB
         $this->saveToFieldName($project_id, $record, $event_id, $img_data,"png");
