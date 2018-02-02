@@ -12,6 +12,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
 	function hook_save_record($project_id, $record, $instrument, $event_id){
 
+        \REDCap::logEvent("Generating Graph","",NULL,$record,$event_id,$project_id);
         $survey_form = $this->getProjectSetting("survey-form",$project_id);
 
         //If we are in the correct instrument
@@ -44,6 +45,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 	}
 
     function generate_graph($project_id,$record,$event_id,$graph_title,$all_data_array){
+        \REDCap::logEvent("Generating Graph2","",NULL,$record,$event_id,$project_id);
         $graph_text = $this->getProjectSetting("graph-text",$project_id);
         $graph_color = $this->getProjectSetting("graph-color",$project_id);
         $graph_background = $this->getProjectSetting("graph-background",$project_id);
@@ -206,7 +208,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
     }
     function saveToFieldName($project_id, $record, $event_id, $img_data, $graph_format){
-
+        \REDCap::logEvent("Saving Graph2","",NULL,$record,$event_id,$project_id);
         $fileFieldName = $this->getProjectSetting("graph-saveto",$project_id);
         if ($fileFieldName) {
             $fileFieldName = str_replace('[', '', trim($fileFieldName));
