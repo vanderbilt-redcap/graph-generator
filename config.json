@@ -52,7 +52,7 @@
     },
     {
       "key": "graph-parameters",
-      "name": "RedCap variable,text,color.<br><i>Format: [redcap_var],my text, #0000</i>",
+      "name": "RedCap variable,text,color.<br><i>Format:<br> [redcap_var],my text, #000000<br>[redcap_var2],my other text, blue,...</i>",
       "type": "textarea"
     },
     {
