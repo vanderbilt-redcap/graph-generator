@@ -221,7 +221,8 @@ if (!defined('MBTTF_DIR')) {
             define('MBTTF_DIR', $sroot.'/fonts/');
         }
     } else {
-        define('MBTTF_DIR','/usr/share/fonts/truetype/');
+//        define('MBTTF_DIR','/usr/share/fonts/truetype/');
+        define('MBTTF_DIR', '../jpgraph/fonts/');
     }
 }
 
