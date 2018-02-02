@@ -36,7 +36,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
             if ($data[$record][$event_id][$var_name] != "") {
                 array_push($all_data_array, $data[$record][$event_id][$var_name]);
                 array_push($graph_text, trim($param_vars[1]));
-                array_push($graph_color, trim($param_vars[2]));
+                array_push($graph_color, trim(strtolower($param_vars[2])));
             }
         }
 
