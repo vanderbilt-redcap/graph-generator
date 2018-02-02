@@ -46,12 +46,22 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $graph_left_label = $this->getProjectSetting("graph-left-label",$project_id);
         $graph_band = $this->getProjectSetting("graph-band",$project_id);
         $graph_size = $this->getProjectSetting("graph-size",$project_id);
+        $font_size = ($this->getProjectSetting("font-size",$project_id) == "")? 15:$this->getProjectSetting("font-size",$project_id);
 
         $graph_size = preg_split("/[;,]+/", $graph_size);
 
-        $graph_yaxis_min = $this->getProjectSetting("graph-yaxis-min",$project_id);
-        $graph_yaxis_max = $this->getProjectSetting("graph-yaxis-max",$project_id);
-        $graph_yaxis_increments = $this->getProjectSetting("graph-yaxis-increments",$project_id);
+        $graph_yaxis = $this->getProjectSetting("graph-yaxis",$project_id);
+        $graph_yaxis = preg_split("/[;,]+/", $graph_yaxis);
+
+        $graph_yaxis_min = ($graph_yaxis[0] == "")? 0 : $graph_yaxis[0];
+        $graph_yaxis_max = ($graph_yaxis[1] == "")? 100 : $graph_yaxis[1];
+        $graph_yaxis_increments = ($graph_yaxis[2] == "")? 10 : $graph_yaxis[2];
+
+        if ($data[$record][$event_id][$var_name] != "") {
+            array_push($all_data_array, $data[$record][$event_id][$var_name]);
+            array_push($graph_text, trim($param_vars[1]));
+            array_push($graph_color, trim($param_vars[2]));
+        }
 
         $count = 0;
         $positions_array = array();
@@ -94,7 +104,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
         //Main title
         $graph->title->Set($graph_title);
-        $graph->title->SetFont(FF_ARIAL,FS_BOLD,16);
+        $graph->title->SetFont(FF_ARIAL,FS_BOLD,$font_size+1);
 
         // Create the bar plots
         $bplot = new \BarPlot($all_data_array);
@@ -104,7 +114,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
         // Title for X-axis
         $graph->xaxis->SetTickLabels($graph_text);
-        $graph->xaxis->SetFont(FF_ARIAL,FS_NORMAL,15);
+        $graph->xaxis->SetFont(FF_ARIAL,FS_NORMAL,$font_size);
 
         $bplot->SetColor('black');
         $graph->graph_theme = null;
@@ -112,7 +122,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         // Title for Y-axis
         $graph->yaxis->title->Set($graph_left_label);
         $graph->yaxis->title->SetMargin(5);
-        $graph->yaxis->title->SetFont(FF_ARIAL,FS_NORMAL,15);
+        $graph->yaxis->title->SetFont(FF_ARIAL,FS_NORMAL,$font_size);
         $graph->yaxis->SetTickPositions($positions_array);
 
 
@@ -123,7 +133,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         if($graph_right_label != ""){
             // Create Y2 scale data set
             $graph->y2axis->title->Set($graph_right_label);
-            $graph->y2axis->title->SetFont(FF_ARIAL,FS_NORMAL,15);
+            $graph->y2axis->title->SetFont(FF_ARIAL,FS_NORMAL,$font_size);
             $graph->y2axis->SetColor('#d8ecf3@1.0:1.3');
             //We scale this axis to hide the extra bars
             $graph->y2axis->scale->SetGrace($scale);
@@ -142,7 +152,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
             $graph->Add($band);
 
             //Add lines
-            $hband = new \PlotBand(HORIZONTAL,BAND_HLINE,0,100,'lightgray');
+            $hband = new \PlotBand(HORIZONTAL,BAND_HLINE,$graph_yaxis_min,$graph_yaxis_max,'lightgray');
             $hband->ShowFrame(false);
             $hband->SetDensity(27);
             $graph->Add($hband);
@@ -154,7 +164,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         // Setup the values that are displayed on top of each bar
         $bplot->value->Show();
         $bplot->value->SetFormat('%d');
-        $bplot->value->SetFont(FF_ARIAL,FS_BOLD,16);
+        $bplot->value->SetFont(FF_ARIAL,FS_BOLD,$font_size+1);
         $bplot->value->SetColor("black");
         // Center the values in the bar
         //$bplot->SetValuePos('center');
@@ -201,7 +211,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
             $fileFieldName = str_replace(']', '', $fileFieldName);
 
             /***SAVE GRAPH IMAGE***/
-            $fileName = "graph_image";
+            $fileName = "graph_image_".$project_id."_".$record;
             $reportHash = $fileName;
             $storedName = md5($reportHash);
             $filePath = EDOC_PATH.$storedName;

@@ -47,13 +47,19 @@
     },
     {
       "key": "graph-size",
-      "name": "Image size (W,H). By default is 750x750 pixels",
+      "name": "Image size W,H. By default is 750,750 pixels",
       "type": "text"
     },
     {
       "key": "graph-parameters",
       "name": "RedCap variable,text,color.<br><i>Format:<br> [redcap_var],my text, #000000<br>[redcap_var2],my other text, blue,...</i>",
+      "required": true,
       "type": "textarea"
+    },
+    {
+      "key": "font-size",
+      "name": "Font size for labels",
+      "type": "text"
     },
     {
       "key": "graph-right-label",
@@ -68,6 +74,7 @@
     {
       "key": "graph-saveto",
       "name": "Field name to store the graph",
+      "required": true,
       "type": "text"
     },
     {
@@ -76,18 +83,8 @@
       "type": "text"
     },
     {
-      "key": "graph-yaxis-min",
-      "name": "Min yaxis",
-      "type": "text"
-    },
-    {
-      "key": "graph-yaxis-max",
-      "name": "Max yaxis",
-      "type": "text"
-    },
-    {
-      "key": "graph-yaxis-increments",
-      "name": "yaxis increments",
+      "key": "graph-yaxis",
+      "name": "Min yaxis, Max yaxis, yaxis increments",
       "type": "text"
     }
   ]
