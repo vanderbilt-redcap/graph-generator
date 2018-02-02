@@ -52,17 +52,7 @@
     },
     {
       "key": "graph-parameters",
-      "name": "RedCap variables with parameter values.<br>Separated by comma",
-      "type": "textarea"
-    },
-    {
-      "key": "graph-text",
-      "name": "Text matching with parameter values.<br>Separated by comma",
-      "type": "textarea"
-    },
-    {
-      "key": "graph-color",
-      "name": "Color bars matching with parameter values.<br>Separated by comma",
+      "name": "RedCap variable,text,color.<br><i>Format: [redcap_var],my text, #0000</i>",
       "type": "textarea"
     },
     {

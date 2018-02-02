@@ -16,44 +16,37 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
         //If we are in the correct instrument
         if ($survey_form && in_array($instrument,$survey_form)) {
-            $graph_title = $this->getProjectSetting("graph-title", $project_id);
-            $graph_parameters = $this->getProjectSetting("graph-parameters", $project_id);
-
-            $graph_parameters = preg_split("/[;,]+/", $graph_parameters);
-
-
-            $data = \REDCap::getData($project_id, 'array', $record);
-            $all_data_array = array();
-            $all_data = true;
-            foreach ($graph_parameters as $param) {
-                $var_name = str_replace('[', '', trim($param));
-                $var_name = str_replace(']', '', $var_name);
-
-                if ($data[$record][$event_id][$var_name] != "") {
-                    array_push($all_data_array, $data[$record][$event_id][$var_name]);
-                } else {
-                    $all_data = false;
-                    break;
-                }
-            }
-
-            if ($all_data) {
-                $this->generate_graph($project_id, $record, $event_id, $graph_title, $all_data_array);
-            }
+            $this->generate_graph($project_id, $record, $event_id);
         }
 	}
 
-    function generate_graph($project_id,$record,$event_id,$graph_title,$all_data_array){
-        $graph_text = $this->getProjectSetting("graph-text",$project_id);
-        $graph_color = $this->getProjectSetting("graph-color",$project_id);
+    function generate_graph($project_id,$record,$event_id){
+        $graph_parameters = $this->getProjectSetting("graph-parameters", $project_id);
+        $graph_parameters = explode("\n",$graph_parameters);
+
+        $data = \REDCap::getData($project_id, 'array', $record);
+        $all_data_array = array();
+        $graph_text = array();
+        $graph_color = array();
+        foreach ($graph_parameters as $param) {
+            $param_vars = preg_split("/[;,]+/", $param);
+            $var_name = str_replace('[', '', trim($param_vars[0]));
+            $var_name = str_replace(']', '', $var_name);
+
+            if ($data[$record][$event_id][$var_name] != "") {
+                array_push($all_data_array, $data[$record][$event_id][$var_name]);
+                array_push($graph_text, trim($param_vars[1]));
+                array_push($graph_color, trim($param_vars[2]));
+            }
+        }
+
+        $graph_title = $this->getProjectSetting("graph-title", $project_id);
         $graph_background = $this->getProjectSetting("graph-background",$project_id);
         $graph_right_label = $this->getProjectSetting("graph-right-label",$project_id);
         $graph_left_label = $this->getProjectSetting("graph-left-label",$project_id);
         $graph_band = $this->getProjectSetting("graph-band",$project_id);
         $graph_size = $this->getProjectSetting("graph-size",$project_id);
 
-        $graph_text = preg_split("/[;,]+/", $graph_text);
-        $graph_color = preg_split("/[;,]+/", $graph_color);
         $graph_size = preg_split("/[;,]+/", $graph_size);
 
         $graph_yaxis_min = $this->getProjectSetting("graph-yaxis-min",$project_id);
