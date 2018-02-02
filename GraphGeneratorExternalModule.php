@@ -109,9 +109,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
 
         // Title for X-axis
-        //        $graph->xaxis->title->Set('Measurement');
-//        $graph->xaxis->title->SetMargin(5);
-//        $graph->xaxis->title->SetFont(FF_ARIAL,FS_NORMAL,11);
         $graph->xaxis->SetTickLabels($graph_text);
         $graph->xaxis->SetFont(FF_ARIAL,FS_NORMAL,15);
 
@@ -170,7 +167,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
         //SAVE IMAGE TO DB
 //        $graph->img->SetImgFormat($graph_format);
-        \REDCap::logEvent("Before stroke","",NULL,$record,$event_id,$project_id);
+        \REDCap::logEvent("Before stroke",json_encode($graph),NULL,$record,$event_id,$project_id);
 
         $img = $graph->Stroke(_IMG_HANDLER);
         \REDCap::logEvent("After stroke","",NULL,$record,$event_id,$project_id);
@@ -179,7 +176,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         imagepng($img);
         $img_data = ob_get_contents();
         ob_end_clean();
-        \REDCap::logEvent("Before saveToFieldName","",NULL,$record,$event_id,$project_id);
 //
 //        echo '<img src="data:image/png;base64,';
 //        echo base64_encode($img_data);
