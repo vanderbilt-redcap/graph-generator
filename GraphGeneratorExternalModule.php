@@ -43,7 +43,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 	}
 
     function generate_graph($project_id,$record,$event_id,$graph_title,$all_data_array){
-        \REDCap::logEvent("Generating Graph2","",NULL,$record,$event_id,$project_id);
         $graph_text = $this->getProjectSetting("graph-text",$project_id);
         $graph_color = $this->getProjectSetting("graph-color",$project_id);
         $graph_background = $this->getProjectSetting("graph-background",$project_id);
@@ -171,13 +170,13 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
         //SAVE IMAGE TO DB
 //        $graph->img->SetImgFormat($graph_format);
-        \REDCap::logEvent("Before stroke","",NULL,$record,$event_id,$project_id);
+        \REDCap::logEvent("Before stroke",$graph->Stroke(_IMG_HANDLER),NULL,$record,$event_id,$project_id);
 
-        //$img = $graph->Stroke(_IMG_HANDLER);
+        $img = $graph->Stroke(_IMG_HANDLER);
         \REDCap::logEvent("After stroke","",NULL,$record,$event_id,$project_id);
         ob_start();
 
-       // imagepng($img);
+        imagepng($img);
         $img_data = ob_get_contents();
         ob_end_clean();
         \REDCap::logEvent("Before saveToFieldName","",NULL,$record,$event_id,$project_id);
