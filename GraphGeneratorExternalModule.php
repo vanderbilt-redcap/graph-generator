@@ -12,8 +12,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
 	function hook_save_record($project_id, $record, $instrument, $event_id){
 
-        ini_set('display_errors',1); error_reporting(E_ALL | E_STRICT);
-
         $survey_form = $this->getProjectSetting("survey-form",$project_id);
 
         //If we are in the correct instrument
@@ -170,16 +168,14 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
         //SAVE IMAGE TO DB
 //        $graph->img->SetImgFormat($graph_format);
-        \REDCap::logEvent("Before stroke","",NULL,$record,$event_id,$project_id);
 
         $img = $graph->Stroke(_IMG_HANDLER);
-        \REDCap::logEvent("After stroke","",NULL,$record,$event_id,$project_id);
         ob_start();
 
         imagepng($img);
         $img_data = ob_get_contents();
         ob_end_clean();
-//
+
 //        echo '<img src="data:image/png;base64,';
 //        echo base64_encode($img_data);
 //        echo '"/>';
@@ -206,7 +202,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
     }
     function saveToFieldName($project_id, $record, $event_id, $img_data, $graph_format){
-        \REDCap::logEvent("Saving Graph","",NULL,$record,$event_id,$project_id);
         $fileFieldName = $this->getProjectSetting("graph-saveto",$project_id);
         if ($fileFieldName) {
             $fileFieldName = str_replace('[', '', trim($fileFieldName));
