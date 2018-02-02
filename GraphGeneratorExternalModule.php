@@ -172,8 +172,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 //        $graph->img->SetImgFormat($graph_format);
         \REDCap::logEvent("Before stroke","",NULL,$record,$event_id,$project_id);
 
-//        $img = $graph->Stroke(_IMG_HANDLER);
-        $img = $graph->Stroke('humble_pie.png');
+        $img = $graph->Stroke(_IMG_HANDLER);
         \REDCap::logEvent("After stroke","",NULL,$record,$event_id,$project_id);
         ob_start();
 
