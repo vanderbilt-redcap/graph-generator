@@ -176,7 +176,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 //        $img = $graph->Stroke(_IMG_HANDLER);
         ob_start();
 
-        imagepng($graph->Stroke(_IMG_HANDLER););
+        imagepng($graph->Stroke(_IMG_HANDLER));
         $img_data = ob_get_contents();
         ob_end_clean();
         \REDCap::logEvent("Before saveToFieldName","",NULL,$record,$event_id,$project_id);
