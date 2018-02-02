@@ -11,6 +11,9 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
     }
 
 	function hook_save_record($project_id, $record, $instrument, $event_id){
+
+        ini_set('display_errors',1); error_reporting(E_ALL | E_STRICT);
+
         $survey_form = $this->getProjectSetting("survey-form",$project_id);
 
         //If we are in the correct instrument
