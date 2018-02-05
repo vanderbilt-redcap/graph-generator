@@ -46,7 +46,7 @@
     },
     {
       "key": "graph-size",
-      "name": "Image size W,H. By default is 750,750 pixels",
+      "name": "Image size W,H.<br/><i>By default 750,750 pixels</i>",
       "type": "text"
     },
     {
