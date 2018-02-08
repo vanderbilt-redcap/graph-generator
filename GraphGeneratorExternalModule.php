@@ -56,12 +56,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $graph_yaxis_max = ($graph_yaxis[1] == "")? 100 : $graph_yaxis[1];
         $graph_yaxis_increments = ($graph_yaxis[2] == "")? 10 : $graph_yaxis[2];
 
-        if ($data[$record][$event_id][$var_name] != "") {
-            array_push($all_data_array, $data[$record][$event_id][$var_name]);
-            array_push($graph_text, trim($param_vars[1]));
-            array_push($graph_color, trim($param_vars[2]));
-        }
-
         $count = 0;
         $positions_array = array();
         for ($position = $graph_yaxis_min; $position <=$graph_yaxis_max; $position+=$graph_yaxis_increments){
@@ -110,7 +104,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         // Create the grouped bar plot
         $gbplot = new \GroupBarPlot(array($bplot));
 
-
         // Title for X-axis
         $graph->xaxis->SetTickLabels($graph_text);
         $graph->xaxis->SetFont(FF_ARIAL,FS_NORMAL,$font_size);
@@ -123,7 +116,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $graph->yaxis->title->SetMargin(5);
         $graph->yaxis->title->SetFont(FF_ARIAL,FS_NORMAL,$font_size);
         $graph->yaxis->SetTickPositions($positions_array);
-
+        $graph->yaxis->SetFont(FF_FONT2);
 
         //scale the ticks to show them all
         $graph->yaxis->scale->SetGrace($scale);
@@ -178,10 +171,10 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $img_data = ob_get_contents();
         ob_end_clean();
 
-//        echo '<img src="data:image/png;base64,';
-//        echo base64_encode($img_data);
-//        echo '"/>';
-//        die;
+        echo '<img src="data:image/png;base64,';
+        echo base64_encode($img_data);
+        echo '"/>';
+        die;
 
         //Save image to DB
         $this->saveToFieldName($project_id, $record, $event_id, $img_data,"png");
