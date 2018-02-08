@@ -16,7 +16,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         //If we are in the correct instrument
         if ($survey_form == $instrument) {
             $this->generate_graph($project_id, $record, $event_id);
-            $this->test();
         }
 	}
 
