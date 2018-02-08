@@ -16,6 +16,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         //If we are in the correct instrument
         if ($survey_form == $instrument) {
             $this->generate_graph($project_id, $record, $event_id);
+            $this->test();
         }
 	}
 
@@ -72,13 +73,14 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
             $scale = "";
         }
 
-        // Create the graph.
+        /***GRAPH***/
         $w = ($graph_size[0] == "")? 750:$graph_size[0];
         $h = ($graph_size[1] == "")? 750:$graph_size[1];
         $graph = new \Graph($w,$h);
 
         // Slightly bigger margins than default to make room for titles
-        $graph->SetMargin(50,60,30,30);
+//        $graph->SetMargin(50,60,30,30);
+        $graph->SetMargin(60+$font_size,60,50,50);
 
         //To set the image background transparent
         $graph->SetMarginColor('White:0.6');
@@ -113,10 +115,13 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
         // Title for Y-axis
         $graph->yaxis->title->Set($graph_left_label);
-        $graph->yaxis->title->SetMargin(5);
+        $graph->yaxis->title->SetMargin($font_size+10);
         $graph->yaxis->title->SetFont(FF_ARIAL,FS_NORMAL,$font_size);
         $graph->yaxis->SetTickPositions($positions_array);
-        $graph->yaxis->SetFont(FF_FONT2);
+        $graph->yaxis->SetFont(FF_ARIAL,FS_BOLD,$font_size);
+//        $graph->yaxis->SetFont(FF_FONT2,FS_BOLD);
+        $graph->yaxis->HideLine(false);
+        $graph->yaxis->HideTicks(false,false);
 
         //scale the ticks to show them all
         $graph->yaxis->scale->SetGrace($scale);
@@ -125,10 +130,13 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         if($graph_right_label != ""){
             // Create Y2 scale data set
             $graph->y2axis->title->Set($graph_right_label);
+            $graph->y2axis->title->SetMargin(10);
             $graph->y2axis->title->SetFont(FF_ARIAL,FS_NORMAL,$font_size);
             $graph->y2axis->SetColor('#d8ecf3@1.0:1.3');
+            $graph->y2axis->HideTicks();
             //We scale this axis to hide the extra bars
             $graph->y2axis->scale->SetGrace($scale);
+
         }
 
         //Add it to the graph
@@ -142,12 +150,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
             $band = new \PlotBand(HORIZONTAL,BAND_SOLID,$graph_band[0],$graph_band[1],'#d8ecf3');
             $band->ShowFrame(false);
             $graph->Add($band);
-
-            //Add lines
-            $hband = new \PlotBand(HORIZONTAL,BAND_HLINE,$graph_yaxis_min,$graph_yaxis_max,'lightgray');
-            $hband->ShowFrame(false);
-            $hband->SetDensity(27);
-            $graph->Add($hband);
         }
 
         //Bar colors
@@ -171,26 +173,26 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $img_data = ob_get_contents();
         ob_end_clean();
 
-//        echo '<img src="data:image/png;base64,';
-//        echo base64_encode($img_data);
-//        echo '"/>';
-//        die;
+        echo '<img src="data:image/png;base64,';
+        echo base64_encode($img_data);
+        echo '"/>';
+        die;
 
         //Save image to DB
         $this->saveToFieldName($project_id, $record, $event_id, $img_data,"png");
     }
 
     function scaleTicks($max_data){
-        $scale_ticks = array(0=>9000,1=>9000,2=>4500,3=>3000,4=>2200,5=>1800,6=>1500,7=>1300,8=>1100,9=>1100,10=>900,
-                            11=>800,12=>700,13=>600,14=>600,15=>550,16=>500,17=>450,18=>450,19=>400,20=>400,
-                            21=>350,22=>350,23=>300,24=>300,25=>300,26=>250,27=>250,28=>250,29=>240,30=>220,
+        $scale_ticks = array(0=>9500,1=>9500,2=>4800,3=>3100,4=>2400,5=>1900,6=>1500,7=>1300,8=>1100,9=>1000,10=>900,
+                            11=>800,12=>700,13=>650,14=>600,15=>550,16=>500,17=>480,18=>450,19=>420,20=>400,
+                            21=>360,22=>350,23=>330,24=>300,25=>300,26=>280,27=>270,28=>250,29=>240,30=>220,
                             31=>220,32=>200,33=>200,34=>190,35=>180,36=>170,37=>170,38=>160,39=>150,40=>150,
                             41=>140,42=>130,43=>130,44=>120,45=>120,46=>110,47=>110,48=>100,49=>100,50=>100,
-                            51=>90,52=>90,53=>80,54=>80,55=>80,56=>70,57=>70,58=>70,59=>60,60=>60,
-                            61=>60,62=>60,63=>50,64=>50,65=>50,66=>50,67=>40,68=>40,69=>40,70=>40,
-                            71=>40,72=>30,73=>30,74=>30,75=>30,76=>30,77=>20,78=>20,79=>20,80=>20,
-                            81=>20,82=>20,83=>20,84=>10,85=>10,86=>10,87=>10,88=>10,89=>10,90=>10,
-                            91=>0,92=>0,93=>0,94=>0,95=>0,96=>0,97=>0,98=>0,99=>0,100=>0
+                            51=>90,52=>90,53=>80,54=>80,55=>80,56=>70,57=>70,58=>70,59=>65,60=>65,
+                            61=>60,62=>60,63=>55,64=>55,65=>50,66=>50,67=>45,68=>45,69=>40,70=>40,
+                            71=>40,72=>30,73=>30,74=>30,75=>30,76=>30,77=>25,78=>25,79=>25,80=>25,
+                            81=>20,82=>20,83=>20,84=>14,85=>14,86=>14,87=>14,88=>10,89=>10,90=>10,
+                            91=>5,92=>5,93=>5,94=>5,95=>5,96=>0,97=>0,98=>0,99=>0,100=>0
         );
 
         return $scale_ticks[$max_data];
