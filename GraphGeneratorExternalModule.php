@@ -173,10 +173,10 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $img_data = ob_get_contents();
         ob_end_clean();
 
-        echo '<img src="data:image/png;base64,';
-        echo base64_encode($img_data);
-        echo '"/>';
-        die;
+//        echo '<img src="data:image/png;base64,';
+//        echo base64_encode($img_data);
+//        echo '"/>';
+//        die;
 
         //Save image to DB
         $this->saveToFieldName($project_id, $record, $event_id, $img_data,"png");
