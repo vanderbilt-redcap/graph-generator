@@ -10,23 +10,28 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         parent::__construct();
     }
 
-	function hook_save_record($project_id, $record, $instrument, $event_id){
+	function hook_save_record($project_id, $record, $instrument, $event_id, $group_id, $survey_hash,$response_id, $repeat_instance){
         $graph_data = $this->getProjectSetting("graph",$project_id);
 
         foreach ($graph_data as $index=>$graph) {
             $survey_form = $this->getProjectSetting("survey-form",$project_id)[$index];
             //If we are in the correct instrument
             if ($survey_form == $instrument) {
-                $this->generate_graph($project_id, $record, $event_id,$index);
+                $this->generate_graph($project_id, $record, $event_id,$index,$repeat_instance,$survey_form);
             }
         }
 	}
 
-    function generate_graph($project_id,$record,$event_id,$index){
+    function generate_graph($project_id,$record,$event_id,$index,$repeat_instance,$survey_form){
+        $data = \REDCap::getData($project_id, 'array', $record);
+        $isRepeatInstrument = false;
+        if((array_key_exists('repeat_instances',$data[$record]))){
+            $isRepeatInstrument = true;
+        }
+
         $graph_parameters = $this->getProjectSetting("graph-parameters", $project_id)[$index];
         $graph_parameters = explode("\n",$graph_parameters);
 
-        $data = \REDCap::getData($project_id, 'array', $record);
         $all_data_array = array();
         $graph_text = array();
         $graph_color = array();
@@ -35,153 +40,159 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
             $var_name = str_replace('[', '', trim($param_vars[0]));
             $var_name = str_replace(']', '', $var_name);
 
-            if ($data[$record][$event_id][$var_name] != "") {
-                array_push($all_data_array, $data[$record][$event_id][$var_name]);
-                array_push($graph_text, trim($param_vars[1]));
-                array_push($graph_color, trim(strtolower($param_vars[2])));
+            $value = $data[$record][$event_id][$var_name];
+            if($isRepeatInstrument && $data[$record]['repeat_instances'][$event_id][$survey_form][$repeat_instance][$var_name] != ""){
+                $value = $data[$record]['repeat_instances'][$event_id][$survey_form][$repeat_instance][$var_name];
             }
+
+            array_push($all_data_array, $value);
+            array_push($graph_text, trim($param_vars[1]));
+            array_push($graph_color, trim(strtolower($param_vars[2])));
         }
 
-        $graph_title = $this->getProjectSetting("graph-title", $project_id)[$index];
-        $graph_background = $this->getProjectSetting("graph-background",$project_id)[$index];
-        $graph_right_label = $this->getProjectSetting("graph-right-label",$project_id)[$index];
-        $graph_left_label = $this->getProjectSetting("graph-left-label",$project_id)[$index];
-        $graph_band = $this->getProjectSetting("graph-band",$project_id)[$index];
-        $graph_size = $this->getProjectSetting("graph-size",$project_id)[$index];
-        $font_size = ($this->getProjectSetting("font-size",$project_id)[$index] == "")? 15:$this->getProjectSetting("font-size",$project_id)[$index];
+        if(sizeof($all_data_array) > 0) {
+            $graph_title = $this->getProjectSetting("graph-title", $project_id)[$index];
+            $graph_background = $this->getProjectSetting("graph-background", $project_id)[$index];
+            $graph_right_label = $this->getProjectSetting("graph-right-label", $project_id)[$index];
+            $graph_left_label = $this->getProjectSetting("graph-left-label", $project_id)[$index];
+            $graph_band = $this->getProjectSetting("graph-band", $project_id)[$index];
+            $graph_size = $this->getProjectSetting("graph-size", $project_id)[$index];
+            $font_size = ($this->getProjectSetting("font-size", $project_id)[$index] == "") ? 15 : $this->getProjectSetting("font-size", $project_id)[$index];
 
-        $graph_size = preg_split("/[;,]+/", $graph_size);
+            $graph_size = preg_split("/[;,]+/", $graph_size);
 
-        $graph_yaxis = $this->getProjectSetting("graph-yaxis",$project_id)[$index];
-        $graph_yaxis = preg_split("/[;,]+/", $graph_yaxis);
+            $graph_yaxis = $this->getProjectSetting("graph-yaxis", $project_id)[$index];
+            $graph_yaxis = preg_split("/[;,]+/", $graph_yaxis);
 
-        $graph_yaxis_min = ($graph_yaxis[0] == "")? 0 : $graph_yaxis[0];
-        $graph_yaxis_max = ($graph_yaxis[1] == "")? 100 : $graph_yaxis[1];
-        $graph_yaxis_increments = ($graph_yaxis[2] == "")? 10 : $graph_yaxis[2];
+            $graph_yaxis_min = ($graph_yaxis[0] == "") ? 0 : $graph_yaxis[0];
+            $graph_yaxis_max = ($graph_yaxis[1] == "") ? 100 : $graph_yaxis[1];
+            $graph_yaxis_increments = ($graph_yaxis[2] == "") ? 10 : $graph_yaxis[2];
 
-        $count = 0;
-        $positions_array = array();
-        for ($position = $graph_yaxis_min; $position <=$graph_yaxis_max; $position+=$graph_yaxis_increments){
-            array_push($positions_array,$position);
+            $count = 0;
+            $positions_array = array();
+            for ($position = $graph_yaxis_min; $position <= $graph_yaxis_max; $position += $graph_yaxis_increments) {
+                array_push($positions_array, $position);
+            }
+            if (!in_array($graph_yaxis_max, $positions_array)) {
+                array_push($positions_array, $graph_yaxis_max);
+            }
+
+            $max_data = max($all_data_array);
+            if ($max_data <= 100) {
+                $scale = $this->scaleTicks($max_data);
+            } else {
+                $scale = "";
+            }
+
+            /***GRAPH***/
+            $w = ($graph_size[0] == "") ? 750 : $graph_size[0];
+            $h = ($graph_size[1] == "") ? 750 : $graph_size[1];
+            $graph = new \Graph($w, $h);
+
+            // Slightly bigger margins than default to make room for titles
+            //        $graph->SetMargin(50,60,30,30);
+            $graph->SetMargin(60 + $font_size, 60, 50, 50);
+
+            //To set the image background transparent
+            $graph->SetMarginColor('White:0.6');
+            $graph->SetFrame(true, 'White:0.6', 1);
+            $graph->SetBox(false);
+            if ($graph_background == "trans") {
+                $graph->img->SetTransparent("white");
+            }
+
+            // Setup the scales for X,Y and Y2 axis
+            $graph->SetScale("textlin"); // X and Y axis
+            if ($graph_right_label != "") {
+                $graph->SetY2Scale("lin"); // Y2 axis
+            }
+            $graph->SetShadow();
+
+            //Main title
+            $graph->title->Set($graph_title);
+            $graph->title->SetFont(FF_ARIAL, FS_BOLD, $font_size + 1);
+
+            // Create the bar plots
+            $bplot = new \BarPlot($all_data_array);
+            // Create the grouped bar plot
+            $gbplot = new \GroupBarPlot(array($bplot));
+
+            // Title for X-axis
+            $graph->xaxis->SetTickLabels($graph_text);
+            $graph->xaxis->SetFont(FF_ARIAL, FS_NORMAL, $font_size);
+
+            $bplot->SetColor('black');
+            $graph->graph_theme = null;
+
+            // Title for Y-axis
+            $graph->yaxis->title->Set($graph_left_label);
+            $graph->yaxis->title->SetMargin($font_size + 10);
+            $graph->yaxis->title->SetFont(FF_ARIAL, FS_NORMAL, $font_size);
+            $graph->yaxis->SetTickPositions($positions_array);
+            $graph->yaxis->SetFont(FF_ARIAL, FS_BOLD, $font_size);
+            //        $graph->yaxis->SetFont(FF_FONT2,FS_BOLD);
+            $graph->yaxis->HideLine(false);
+            $graph->yaxis->HideTicks(false, false);
+
+            //scale the ticks to show them all
+            $graph->yaxis->scale->SetGrace($scale);
+
+            //Add right side titles
+            if ($graph_right_label != "") {
+                // Create Y2 scale data set
+                $graph->y2axis->title->Set($graph_right_label);
+                $graph->y2axis->title->SetMargin(10);
+                $graph->y2axis->title->SetFont(FF_ARIAL, FS_NORMAL, $font_size);
+                $graph->y2axis->SetColor('#d8ecf3@1.0:1.3');
+                $graph->y2axis->HideTicks();
+                //We scale this axis to hide the extra bars
+                $graph->y2axis->scale->SetGrace($scale);
+
+            }
+
+            //Add it to the graph
+            $graph->Add($gbplot);
+            $graph->AddY2($gbplot);
+
+            if ($graph_band != "") {
+                $graph_band = preg_split("/[;,]+/", $graph_band);
+                //Add band
+                $graph->ygrid->Show(false);
+                $band = new \PlotBand(HORIZONTAL, BAND_SOLID, $graph_band[0], $graph_band[1], '#d8ecf3');
+                $band->ShowFrame(false);
+                $graph->Add($band);
+            }
+
+            //Bar colors
+            $bplot->SetFillColor($graph_color);
+
+            // Setup the values that are displayed on top of each bar
+            $bplot->value->Show();
+            $bplot->value->SetFormat('%d');
+            $bplot->value->SetFont(FF_ARIAL, FS_BOLD, $font_size + 1);
+            $bplot->value->SetColor("black");
+            // Center the values in the bar
+            //$bplot->SetValuePos('center');
+
+            //SAVE IMAGE TO DB
+            //        $graph->img->SetImgFormat($graph_format);
+
+            $img = $graph->Stroke(_IMG_HANDLER);
+            ob_start();
+
+            imagepng($img);
+            $img_data = ob_get_contents();
+            ob_end_clean();
+
+            //        echo '<img src="data:image/png;base64,';
+            //        echo base64_encode($img_data);
+            //        echo '"/>';
+            //        die;
+
+
+            //Save image to DB
+            $this->saveToFieldName($project_id, $record, $event_id, $img_data, "png", $index);
         }
-        if(!in_array ($graph_yaxis_max,$positions_array)){
-            array_push($positions_array,$graph_yaxis_max);
-        }
-
-        $max_data = max($all_data_array);
-        if($max_data <= 100){
-            $scale = $this->scaleTicks($max_data);
-        }else{
-            $scale = "";
-        }
-
-        /***GRAPH***/
-        $w = ($graph_size[0] == "")? 750:$graph_size[0];
-        $h = ($graph_size[1] == "")? 750:$graph_size[1];
-        $graph = new \Graph($w,$h);
-
-        // Slightly bigger margins than default to make room for titles
-//        $graph->SetMargin(50,60,30,30);
-        $graph->SetMargin(60+$font_size,60,50,50);
-
-        //To set the image background transparent
-        $graph->SetMarginColor('White:0.6');
-        $graph->SetFrame(true,'White:0.6',1);
-        $graph->SetBox(false);
-        if($graph_background == "trans"){
-            $graph->img->SetTransparent("white");
-        }
-
-        // Setup the scales for X,Y and Y2 axis
-        $graph->SetScale("textlin"); // X and Y axis
-        if($graph_right_label != "") {
-            $graph->SetY2Scale("lin"); // Y2 axis
-        }
-        $graph->SetShadow();
-
-        //Main title
-        $graph->title->Set($graph_title);
-        $graph->title->SetFont(FF_ARIAL,FS_BOLD,$font_size+1);
-
-        // Create the bar plots
-        $bplot = new \BarPlot($all_data_array);
-        // Create the grouped bar plot
-        $gbplot = new \GroupBarPlot(array($bplot));
-
-        // Title for X-axis
-        $graph->xaxis->SetTickLabels($graph_text);
-        $graph->xaxis->SetFont(FF_ARIAL,FS_NORMAL,$font_size);
-
-        $bplot->SetColor('black');
-        $graph->graph_theme = null;
-
-        // Title for Y-axis
-        $graph->yaxis->title->Set($graph_left_label);
-        $graph->yaxis->title->SetMargin($font_size+10);
-        $graph->yaxis->title->SetFont(FF_ARIAL,FS_NORMAL,$font_size);
-        $graph->yaxis->SetTickPositions($positions_array);
-        $graph->yaxis->SetFont(FF_ARIAL,FS_BOLD,$font_size);
-//        $graph->yaxis->SetFont(FF_FONT2,FS_BOLD);
-        $graph->yaxis->HideLine(false);
-        $graph->yaxis->HideTicks(false,false);
-
-        //scale the ticks to show them all
-        $graph->yaxis->scale->SetGrace($scale);
-
-        //Add right side titles
-        if($graph_right_label != ""){
-            // Create Y2 scale data set
-            $graph->y2axis->title->Set($graph_right_label);
-            $graph->y2axis->title->SetMargin(10);
-            $graph->y2axis->title->SetFont(FF_ARIAL,FS_NORMAL,$font_size);
-            $graph->y2axis->SetColor('#d8ecf3@1.0:1.3');
-            $graph->y2axis->HideTicks();
-            //We scale this axis to hide the extra bars
-            $graph->y2axis->scale->SetGrace($scale);
-
-        }
-
-        //Add it to the graph
-        $graph->Add($gbplot);
-        $graph->AddY2($gbplot);
-
-        if($graph_band != ""){
-            $graph_band = preg_split("/[;,]+/", $graph_band);
-            //Add band
-            $graph->ygrid->Show(false);
-            $band = new \PlotBand(HORIZONTAL,BAND_SOLID,$graph_band[0],$graph_band[1],'#d8ecf3');
-            $band->ShowFrame(false);
-            $graph->Add($band);
-        }
-
-        //Bar colors
-        $bplot->SetFillColor($graph_color);
-
-        // Setup the values that are displayed on top of each bar
-        $bplot->value->Show();
-        $bplot->value->SetFormat('%d');
-        $bplot->value->SetFont(FF_ARIAL,FS_BOLD,$font_size+1);
-        $bplot->value->SetColor("black");
-        // Center the values in the bar
-        //$bplot->SetValuePos('center');
-
-        //SAVE IMAGE TO DB
-//        $graph->img->SetImgFormat($graph_format);
-
-        $img = $graph->Stroke(_IMG_HANDLER);
-        ob_start();
-
-        imagepng($img);
-        $img_data = ob_get_contents();
-        ob_end_clean();
-
-//        echo '<img src="data:image/png;base64,';
-//        echo base64_encode($img_data);
-//        echo '"/>';
-//        die;
-
-        //Save image to DB
-        $this->saveToFieldName($project_id, $record, $event_id, $img_data,"png",$index);
     }
 
     function scaleTicks($max_data){
@@ -207,7 +218,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
             $fileFieldName = str_replace(']', '', $fileFieldName);
 
             /***SAVE GRAPH IMAGE***/
-            $fileName = "graph_image_".$project_id."_".$record;
+            $fileName = "graph_image_".$project_id."_".$record."_".$fileFieldName;
             $reportHash = $fileName;
             $storedName = md5($reportHash);
             $filePath = EDOC_PATH.$storedName;
