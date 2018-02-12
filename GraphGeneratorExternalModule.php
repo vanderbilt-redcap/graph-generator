@@ -195,7 +195,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
 
             //Save image to DB
-            $this->saveToFieldName($project_id, $record, $event_id, $img_data, "png", $index);
+            $this->saveToFieldName($project_id, $record, $event_id, $img_data, "png", $index,$repeat_instance);
         }
     }
 
@@ -215,14 +215,14 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         return $scale_ticks[$max_data];
 
     }
-    function saveToFieldName($project_id, $record, $event_id, $img_data, $graph_format,$index){
+    function saveToFieldName($project_id, $record, $event_id, $img_data, $graph_format,$index,$repeat_instance){
         $fileFieldName = $this->getProjectSetting("graph-saveto",$project_id)[$index];
         if ($fileFieldName) {
             $fileFieldName = str_replace('[', '', trim($fileFieldName));
             $fileFieldName = str_replace(']', '', $fileFieldName);
 
             /***SAVE GRAPH IMAGE***/
-            $fileName = "graph_image_".$project_id."_".$record."_".$fileFieldName;
+            $fileName = "graph_image_".$project_id."_".$record."_".$fileFieldName."_".$repeat_instance;
             $reportHash = $fileName;
             $storedName = md5($reportHash);
             $filePath = EDOC_PATH.$storedName;
