@@ -11,16 +11,19 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
     }
 
 	function hook_save_record($project_id, $record, $instrument, $event_id){
+        $graph_data = $this->getProjectSetting("graph",$project_id);
 
-        $survey_form = $this->getProjectSetting("survey-form",$project_id);
-        //If we are in the correct instrument
-        if ($survey_form == $instrument) {
-            $this->generate_graph($project_id, $record, $event_id);
+        foreach ($graph_data as $index=>$graph) {
+            $survey_form = $this->getProjectSetting("survey-form",$project_id)[$index];
+            //If we are in the correct instrument
+            if ($survey_form == $instrument) {
+                $this->generate_graph($project_id, $record, $event_id,$index);
+            }
         }
 	}
 
-    function generate_graph($project_id,$record,$event_id){
-        $graph_parameters = $this->getProjectSetting("graph-parameters", $project_id);
+    function generate_graph($project_id,$record,$event_id,$index){
+        $graph_parameters = $this->getProjectSetting("graph-parameters", $project_id)[$index];
         $graph_parameters = explode("\n",$graph_parameters);
 
         $data = \REDCap::getData($project_id, 'array', $record);
@@ -39,17 +42,17 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
             }
         }
 
-        $graph_title = $this->getProjectSetting("graph-title", $project_id);
-        $graph_background = $this->getProjectSetting("graph-background",$project_id);
-        $graph_right_label = $this->getProjectSetting("graph-right-label",$project_id);
-        $graph_left_label = $this->getProjectSetting("graph-left-label",$project_id);
-        $graph_band = $this->getProjectSetting("graph-band",$project_id);
-        $graph_size = $this->getProjectSetting("graph-size",$project_id);
-        $font_size = ($this->getProjectSetting("font-size",$project_id) == "")? 15:$this->getProjectSetting("font-size",$project_id);
+        $graph_title = $this->getProjectSetting("graph-title", $project_id)[$index];
+        $graph_background = $this->getProjectSetting("graph-background",$project_id)[$index];
+        $graph_right_label = $this->getProjectSetting("graph-right-label",$project_id)[$index];
+        $graph_left_label = $this->getProjectSetting("graph-left-label",$project_id)[$index];
+        $graph_band = $this->getProjectSetting("graph-band",$project_id)[$index];
+        $graph_size = $this->getProjectSetting("graph-size",$project_id)[$index];
+        $font_size = ($this->getProjectSetting("font-size",$project_id)[$index] == "")? 15:$this->getProjectSetting("font-size",$project_id)[$index];
 
         $graph_size = preg_split("/[;,]+/", $graph_size);
 
-        $graph_yaxis = $this->getProjectSetting("graph-yaxis",$project_id);
+        $graph_yaxis = $this->getProjectSetting("graph-yaxis",$project_id)[$index];
         $graph_yaxis = preg_split("/[;,]+/", $graph_yaxis);
 
         $graph_yaxis_min = ($graph_yaxis[0] == "")? 0 : $graph_yaxis[0];
@@ -178,7 +181,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 //        die;
 
         //Save image to DB
-        $this->saveToFieldName($project_id, $record, $event_id, $img_data,"png");
+        $this->saveToFieldName($project_id, $record, $event_id, $img_data,"png",$index);
     }
 
     function scaleTicks($max_data){
@@ -197,8 +200,8 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         return $scale_ticks[$max_data];
 
     }
-    function saveToFieldName($project_id, $record, $event_id, $img_data, $graph_format){
-        $fileFieldName = $this->getProjectSetting("graph-saveto",$project_id);
+    function saveToFieldName($project_id, $record, $event_id, $img_data, $graph_format,$index){
+        $fileFieldName = $this->getProjectSetting("graph-saveto",$project_id)[$index];
         if ($fileFieldName) {
             $fileFieldName = str_replace('[', '', trim($fileFieldName));
             $fileFieldName = str_replace(']', '', $fileFieldName);

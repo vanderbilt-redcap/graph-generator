@@ -17,74 +17,84 @@
 
   "description": "Generated a Graph Image and saves it in a variable",
 
-  "project-settings": [
-    {
-      "key": "survey-form",
-      "name": "Survey to Screen With",
-      "required": true,
-      "type": "form-list"
-    },
-    {
-      "key": "graph-title",
-      "name": "Title on the image graph",
-      "type": "text"
-    },
-    {
-      "key": "graph-background",
-      "name": "Image Background",
-      "choices":[
-        {
-          "name" : "Transparent",
-          "value" : "trans"
-        },
-        {
-          "name" : "White",
-          "value" : "white"
-        }
-      ],
-      "type": "radio"
-    },
-    {
-      "key": "graph-size",
-      "name": "Image size W,H.<br/><i>By default 750,750 pixels</i>",
-      "type": "text"
-    },
-    {
-      "key": "graph-parameters",
-      "name": "RedCap variable,text,color.<br><i>Format:<br> [redcap_var],my text, #000000<br>[redcap_var2],my other text, blue,...</i>",
-      "required": true,
-      "type": "textarea"
-    },
-    {
-      "key": "font-size",
-      "name": "Font size for labels",
-      "type": "text"
-    },
-    {
-      "key": "graph-right-label",
-      "name": "Text displayed on the right",
-      "type": "text"
-    },
-    {
-      "key": "graph-left-label",
-      "name": "Text displayed on the left",
-      "type": "text"
-    },
-    {
-      "key": "graph-saveto",
-      "name": "Field name to store the graph",
-      "required": true,
-      "type": "text"
-    },
-    {
-      "key": "graph-band",
-      "name": "Band position. Format: bottom,top",
-      "type": "text"
-    },
-    {
-      "key": "graph-yaxis",
-      "name": "Min yaxis, Max yaxis, yaxis increments",
-      "type": "text"
-    }
-  ]
+  "project-settings":
+    [
+      {
+        "key": "graph",
+        "name": "GRAPH",
+        "required": true,
+        "type": "sub_settings",
+        "repeatable": true,
+        "sub_settings": [
+          {
+            "key": "survey-form",
+            "name": "Survey to Screen With",
+            "required": true,
+            "type": "form-list"
+          },
+          {
+            "key": "graph-title",
+            "name": "Title on the image graph",
+            "type": "text"
+          },
+          {
+            "key": "graph-background",
+            "name": "Image Background",
+            "choices": [
+              {
+                "name": "Transparent",
+                "value": "trans"
+              },
+              {
+                "name": "White",
+                "value": "white"
+              }
+            ],
+            "type": "radio"
+          },
+          {
+            "key": "graph-size",
+            "name": "Image size W,H.<br/><i>By default 750,750 pixels</i>",
+            "type": "text"
+          },
+          {
+            "key": "graph-parameters",
+            "name": "RedCap variable,text,color.<br><i>Format:<br> [redcap_var],my text, #000000<br>[redcap_var2],my other text, blue,...</i>",
+            "required": true,
+            "type": "textarea"
+          },
+          {
+            "key": "font-size",
+            "name": "Font size for labels",
+            "type": "text"
+          },
+          {
+            "key": "graph-right-label",
+            "name": "Text displayed on the right",
+            "type": "text"
+          },
+          {
+            "key": "graph-left-label",
+            "name": "Text displayed on the left",
+            "type": "text"
+          },
+          {
+            "key": "graph-saveto",
+            "name": "Field name to store the graph",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "key": "graph-band",
+            "name": "Band position. Format: bottom,top",
+            "type": "text"
+          },
+          {
+            "key": "graph-yaxis",
+            "name": "Min yaxis, Max yaxis, yaxis increments",
+            "type": "text"
+          }
+        ]
+      }
+    ]
 }
