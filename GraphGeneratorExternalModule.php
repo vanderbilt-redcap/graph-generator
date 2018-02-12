@@ -10,6 +10,10 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         parent::__construct();
     }
 
+    function validateSettings($settings){
+
+    }
+
 	function hook_save_record($project_id, $record, $instrument, $event_id, $group_id, $survey_hash,$response_id, $repeat_instance){
         $graph_data = $this->getProjectSetting("graph",$project_id);
 
@@ -88,114 +92,125 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
                 $scale = "";
             }
 
-            /***GRAPH***/
-            $w = ($graph_size[0] == "") ? 750 : $graph_size[0];
-            $h = ($graph_size[1] == "") ? 750 : $graph_size[1];
-            $graph = new \Graph($w, $h);
+            try {
 
-            // Slightly bigger margins than default to make room for titles
-            //        $graph->SetMargin(50,60,30,30);
-            $graph->SetMargin(60 + $font_size, 60, 50, 50);
+                /***GRAPH***/
+                $w = ($graph_size[0] == "") ? 750 : $graph_size[0];
+                $h = ($graph_size[1] == "") ? 750 : $graph_size[1];
+                $graph = new \Graph($w, $h);
 
-            //To set the image background transparent
-            $graph->SetMarginColor('White:0.6');
-            $graph->SetFrame(true, 'White:0.6', 1);
-            $graph->SetBox(false);
-            if ($graph_background == "trans") {
-                $graph->img->SetTransparent("white");
+                // Slightly bigger margins than default to make room for titles
+                //        $graph->SetMargin(50,60,30,30);
+                $graph->SetMargin(60 + $font_size, 60, 50, 50);
+
+                //To set the image background transparent
+                $graph->SetMarginColor('White:0.6');
+                $graph->SetFrame(true, 'White:0.6', 1);
+                $graph->SetBox(false);
+                if ($graph_background == "trans") {
+                    $graph->img->SetTransparent("white");
+                }
+
+                // Setup the scales for X,Y and Y2 axis
+                $graph->SetScale("textlin"); // X and Y axis
+                if ($graph_right_label != "") {
+                    $graph->SetY2Scale("lin"); // Y2 axis
+                }
+                $graph->SetShadow();
+
+                //Main title
+                $graph->title->Set($graph_title);
+                $graph->title->SetFont(FF_ARIAL, FS_BOLD, $font_size + 1);
+
+                // Create the bar plots
+                $bplot = new \BarPlot($all_data_array);
+                // Create the grouped bar plot
+                $gbplot = new \GroupBarPlot(array($bplot));
+
+                // Title for X-axis
+                $graph->xaxis->SetTickLabels($graph_text);
+                $graph->xaxis->SetFont(FF_ARIAL, FS_NORMAL, $font_size);
+
+                $bplot->SetColor('black');
+                $graph->graph_theme = null;
+
+                // Title for Y-axis
+                $graph->yaxis->title->Set($graph_left_label);
+                $graph->yaxis->title->SetMargin($font_size + 10);
+                $graph->yaxis->title->SetFont(FF_ARIAL, FS_NORMAL, $font_size);
+                $graph->yaxis->SetTickPositions($positions_array);
+                $graph->yaxis->SetFont(FF_ARIAL, FS_BOLD, $font_size);
+                //        $graph->yaxis->SetFont(FF_FONT2,FS_BOLD);
+                $graph->yaxis->HideLine(false);
+                $graph->yaxis->HideTicks(false, false);
+
+                //scale the ticks to show them all
+                $graph->yaxis->scale->SetGrace($scale);
+
+                //Add right side titles
+                if ($graph_right_label != "") {
+                    // Create Y2 scale data set
+                    $graph->y2axis->title->Set($graph_right_label);
+                    $graph->y2axis->title->SetMargin(10);
+                    $graph->y2axis->title->SetFont(FF_ARIAL, FS_NORMAL, $font_size);
+                    $graph->y2axis->SetColor('#d8ecf3@1.0:1.3');
+                    $graph->y2axis->HideTicks();
+                    //We scale this axis to hide the extra bars
+                    $graph->y2axis->scale->SetGrace($scale);
+
+                }
+
+                //Add it to the graph
+                $graph->Add($gbplot);
+                $graph->AddY2($gbplot);
+
+                if ($graph_band != "") {
+                    $graph_band = preg_split("/[;,]+/", $graph_band);
+                    //Add band
+                    $graph->ygrid->Show(false);
+                    $band = new \PlotBand(HORIZONTAL, BAND_SOLID, $graph_band[0], $graph_band[1], '#d8ecf3');
+                    $band->ShowFrame(false);
+                    $graph->Add($band);
+                }
+
+                //Bar colors
+                $bplot->SetFillColor($graph_color);
+
+                // Setup the values that are displayed on top of each bar
+                $bplot->value->Show();
+                $bplot->value->SetFormat('%d');
+                $bplot->value->SetFont(FF_ARIAL, FS_BOLD, $font_size + 1);
+                $bplot->value->SetColor("black");
+                // Center the values in the bar
+                //$bplot->SetValuePos('center');
+
+                //SAVE IMAGE TO DB
+                //$graph->img->SetImgFormat($graph_format);
+
+                $img = $graph->Stroke(_IMG_HANDLER);
+                ob_start();
+
+                imagepng($img);
+                $img_data = ob_get_contents();
+                ob_end_clean();
+
+                //        echo '<img src="data:image/png;base64,';
+                //        echo base64_encode($img_data);
+                //        echo '"/>';
+                //        die;
+
+
+                //Save image to DB
+                $this->saveToFieldName($project_id, $record, $event_id, $img_data, "png", $index, $repeat_instance);
+            } catch (Exception $e) {
+                $email_error = $this->getProjectSetting("error", $project_id);
+
+                $body = "<p>There was an error in producing the GRAPH image: </p>";
+                $subject = \REDCap::getProjectTitle() . ": GRAPH submission (error)";
+
+                ExternalModules::sendErrorEmail($email_error,$subject,$body);
+
             }
-
-            // Setup the scales for X,Y and Y2 axis
-            $graph->SetScale("textlin"); // X and Y axis
-            if ($graph_right_label != "") {
-                $graph->SetY2Scale("lin"); // Y2 axis
-            }
-            $graph->SetShadow();
-
-            //Main title
-            $graph->title->Set($graph_title);
-            $graph->title->SetFont(FF_ARIAL, FS_BOLD, $font_size + 1);
-
-            // Create the bar plots
-            $bplot = new \BarPlot($all_data_array);
-            // Create the grouped bar plot
-            $gbplot = new \GroupBarPlot(array($bplot));
-
-            // Title for X-axis
-            $graph->xaxis->SetTickLabels($graph_text);
-            $graph->xaxis->SetFont(FF_ARIAL, FS_NORMAL, $font_size);
-
-            $bplot->SetColor('black');
-            $graph->graph_theme = null;
-
-            // Title for Y-axis
-            $graph->yaxis->title->Set($graph_left_label);
-            $graph->yaxis->title->SetMargin($font_size + 10);
-            $graph->yaxis->title->SetFont(FF_ARIAL, FS_NORMAL, $font_size);
-            $graph->yaxis->SetTickPositions($positions_array);
-            $graph->yaxis->SetFont(FF_ARIAL, FS_BOLD, $font_size);
-            //        $graph->yaxis->SetFont(FF_FONT2,FS_BOLD);
-            $graph->yaxis->HideLine(false);
-            $graph->yaxis->HideTicks(false, false);
-
-            //scale the ticks to show them all
-            $graph->yaxis->scale->SetGrace($scale);
-
-            //Add right side titles
-            if ($graph_right_label != "") {
-                // Create Y2 scale data set
-                $graph->y2axis->title->Set($graph_right_label);
-                $graph->y2axis->title->SetMargin(10);
-                $graph->y2axis->title->SetFont(FF_ARIAL, FS_NORMAL, $font_size);
-                $graph->y2axis->SetColor('#d8ecf3@1.0:1.3');
-                $graph->y2axis->HideTicks();
-                //We scale this axis to hide the extra bars
-                $graph->y2axis->scale->SetGrace($scale);
-
-            }
-
-            //Add it to the graph
-            $graph->Add($gbplot);
-            $graph->AddY2($gbplot);
-
-            if ($graph_band != "") {
-                $graph_band = preg_split("/[;,]+/", $graph_band);
-                //Add band
-                $graph->ygrid->Show(false);
-                $band = new \PlotBand(HORIZONTAL, BAND_SOLID, $graph_band[0], $graph_band[1], '#d8ecf3');
-                $band->ShowFrame(false);
-                $graph->Add($band);
-            }
-
-            //Bar colors
-            $bplot->SetFillColor($graph_color);
-
-            // Setup the values that are displayed on top of each bar
-            $bplot->value->Show();
-            $bplot->value->SetFormat('%d');
-            $bplot->value->SetFont(FF_ARIAL, FS_BOLD, $font_size + 1);
-            $bplot->value->SetColor("black");
-            // Center the values in the bar
-            //$bplot->SetValuePos('center');
-
-            //SAVE IMAGE TO DB
-            //        $graph->img->SetImgFormat($graph_format);
-
-            $img = $graph->Stroke(_IMG_HANDLER);
-            ob_start();
-
-            imagepng($img);
-            $img_data = ob_get_contents();
-            ob_end_clean();
-
-            //        echo '<img src="data:image/png;base64,';
-            //        echo base64_encode($img_data);
-            //        echo '"/>';
-            //        die;
-
-
-            //Save image to DB
-            $this->saveToFieldName($project_id, $record, $event_id, $img_data, "png", $index,$repeat_instance);
         }
     }
 

@@ -20,6 +20,11 @@
   "project-settings":
     [
       {
+        "key": "error",
+        "name": "Send errors to specified email address.<br/><i>Emails separated by comma</i>",
+        "type": "text"
+      },
+      {
         "key": "graph",
         "name": "GRAPH",
         "required": true,
