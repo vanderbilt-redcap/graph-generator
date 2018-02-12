@@ -42,7 +42,11 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
             $value = $data[$record][$event_id][$var_name];
             if($isRepeatInstrument && $data[$record]['repeat_instances'][$event_id][$survey_form][$repeat_instance][$var_name] != ""){
+                //Repeat instruments
                 $value = $data[$record]['repeat_instances'][$event_id][$survey_form][$repeat_instance][$var_name];
+            }else if($isRepeatInstrument && $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$var_name] != ""){
+                //Repeat events
+                $value = $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$var_name];
             }
 
             array_push($all_data_array, $value);
