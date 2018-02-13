@@ -14,7 +14,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $error = "";
         foreach ($settings['graph-size'] as $index => $graph_size){
             $param_vars = preg_split("/[;,]+/", $graph_size);
-            if(sizeof($param_vars) != "2"&& $graph_size != ""){
+            if(sizeof($param_vars) != "2" && $graph_size != ""){
                 $error .= "The format of the Image size ".($index+1)." is incorrect. Please enter a correct format: width,height.\n";
             }
         }
@@ -27,7 +27,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
         foreach ($settings['graph-band'] as $index => $graph_band){
             $param_vars = preg_split("/[;,]+/", $graph_band);
-            if(sizeof($param_vars) != "2"&& $graph_band != ""){
+            if(sizeof($param_vars) != "2" && $graph_band != ""){
                 $error .= "The format of the Band position ".($index+1)." is incorrect. Please enter a correct format: bottom,top.\n";
             }
         }
