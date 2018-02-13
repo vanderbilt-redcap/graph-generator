@@ -11,7 +11,49 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
     }
 
     function validateSettings($settings){
+        $error = "";
+        foreach ($settings['graph-size'] as $index => $graph_size){
+            $param_vars = preg_split("/[;,]+/", $graph_size);
+            if(sizeof($param_vars) != "2"&& $graph_size != ""){
+                $error .= "The format of the Image size ".($index+1)." is incorrect. Please enter a correct format: width,height.\n";
+            }
+        }
 
+        foreach ($settings['graph-saveto'] as $index => $graph_saveto){
+            if (strpos($graph_saveto, '[') !== false || strpos($graph_saveto, ']') !== false) {
+                $error .= "The field name ".($index+1)." to store the graph can't contain []. Please enter a correct format.\n";
+            }
+        }
+
+        foreach ($settings['graph-band'] as $index => $graph_band){
+            $param_vars = preg_split("/[;,]+/", $graph_band);
+            if(sizeof($param_vars) != "2"&& $graph_band != ""){
+                $error .= "The format of the Band position ".($index+1)." is incorrect. Please enter a correct format: bottom,top.\n";
+            }
+        }
+
+        foreach ($settings['graph-yaxis'] as $index => $graph_yaxis){
+            $param_vars = preg_split("/[;,]+/", $graph_yaxis);
+            if(sizeof($param_vars) != "3" && $graph_yaxis != ""){
+                $error .= "The format of the yaxis ".($index+1)." is incorrect. Please enter a correct format: Min, Max, increments.\n";
+            }
+        }
+
+        foreach ($settings['graph-parameters'] as $index => $graph_parameters){
+            if($graph_parameters != "") {
+                $graph_parameters = explode("\n", $graph_parameters);
+                foreach ($graph_parameters as $param) {
+                    $param_vars = preg_split("/[;,]+/", $param);
+                    if (sizeof($param_vars) != "3" && $param != "") {
+                        $error .= "The format of the parameters " . ($index + 1) . " is incorrect. Please enter a correct format: [redcap_var],my text, #000000.\n";
+                    }else if (strpos($param_vars[0], '[') === false || strpos($param_vars[0], ']') === false) {
+                        $error .= "The format of the parameter variable ".$param_vars[0]." on " . ($index + 1) . " is incorrect. Please enter a correct format: [redcap_var],my text, #000000.\n";
+                    }
+                }
+            }
+        }
+
+        return $error;
     }
 
 	function hook_save_record($project_id, $record, $instrument, $event_id, $group_id, $survey_hash,$response_id, $repeat_instance){
