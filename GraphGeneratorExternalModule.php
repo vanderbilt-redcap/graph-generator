@@ -109,7 +109,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
                 $value = $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$var_name];
             }
 
-            if($value != "" ){
+            if($value != "" && is_numeric($value)){
                 array_push($all_data_array, $value);
                 array_push($graph_text, trim($param_vars[1]));
                 array_push($graph_color, trim(strtolower($param_vars[2])));
@@ -266,22 +266,23 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
 
                 //Save image to DB
                 $this->saveToFieldName($project_id, $record, $event_id, $img_data, "png", $index, $repeat_instance);
+
             } catch (\JpGraphExceptionL $e) {
-                $this->sendEmailError($project_id);
+                $this->sendEmailError($project_id,$e);
             }
             catch (\JpGraphException $e) {
-                $this->sendEmailError($project_id);
+                $this->sendEmailError($project_id,$e);
             }
             catch (Exception $e) {
-                $this->sendEmailError($project_id);
+                $this->sendEmailError($project_id,$e);
             }
         }
     }
 
-    function sendEmailError($project_id){
+    function sendEmailError($project_id,$e){
         $email_error = $this->getProjectSetting("error", $project_id);
 
-        $body = "<p>There was an error in producing the GRAPH image: </p>";
+        $body = "<p>There was an error in producing the GRAPH image: ".$e->getMessage()."</p>";
         $subject = \REDCap::getProjectTitle() . ": GRAPH submission (error)";
 
         ExternalModules::sendErrorEmail($email_error,$subject,$body);
