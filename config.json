@@ -26,7 +26,7 @@
       },
       {
         "key": "graph",
-        "name": "GRAPH",
+        "name": "GRAPH<br/><span style='color:red;font-weight:bold'>**The graph only works with numeric variables</span>",
         "required": true,
         "type": "sub_settings",
         "repeatable": true,

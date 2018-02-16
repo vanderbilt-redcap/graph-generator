@@ -105,7 +105,7 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
                 $value = $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$var_name];
             }
 
-            if($value != ""){
+            if($value != "" && is_numeric($value)){
                 array_push($all_data_array, $value);
                 array_push($graph_text, trim($param_vars[1]));
                 array_push($graph_color, trim(strtolower($param_vars[2])));
@@ -263,7 +263,6 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
                 $subject = \REDCap::getProjectTitle() . ": GRAPH submission (error)";
 
                 ExternalModules::sendErrorEmail($email_error,$subject,$body);
-
             }
         }
     }
