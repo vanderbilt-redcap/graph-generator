@@ -14,28 +14,36 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
         $error = "";
         foreach ($settings['graph-size'] as $index => $graph_size){
             $param_vars = preg_split("/[;,]+/", $graph_size);
-            if(sizeof($param_vars) != "2" && $graph_size != ""){
-                $error .= "The format of the Image size ".($index+1)." is incorrect. Please enter a correct format: width,height.\n";
+            if($graph_size != "") {
+                if (sizeof($param_vars) != "2" && $graph_size != "") {
+                    $error .= "The format of the Image size " . ($index + 1) . " is incorrect. Please enter a correct format: width,height.\n";
+                }
             }
         }
 
         foreach ($settings['graph-saveto'] as $index => $graph_saveto){
-            if (strpos($graph_saveto, '[') !== false || strpos($graph_saveto, ']') !== false) {
-                $error .= "The field name ".($index+1)." to store the graph can't contain []. Please enter a correct format.\n";
+            if($graph_saveto != "") {
+                if (strpos($graph_saveto, '[') !== false || strpos($graph_saveto, ']') !== false) {
+                    $error .= "The field name " . ($index + 1) . " to store the graph can't contain []. Please enter a correct format.\n";
+                }
             }
         }
 
         foreach ($settings['graph-band'] as $index => $graph_band){
             $param_vars = preg_split("/[;,]+/", $graph_band);
-            if(sizeof($param_vars) != "2" && $graph_band != ""){
-                $error .= "The format of the Band position ".($index+1)." is incorrect. Please enter a correct format: bottom,top.\n";
+            if($graph_band != "") {
+                if (sizeof($param_vars) != "2") {
+                    $error .= "The format of the Band position " . ($index + 1) . " is incorrect. Please enter a correct format: bottom,top.\n";
+                }
             }
         }
 
         foreach ($settings['graph-yaxis'] as $index => $graph_yaxis){
             $param_vars = preg_split("/[;,]+/", $graph_yaxis);
-            if(sizeof($param_vars) != "3" && $graph_yaxis != ""){
-                $error .= "The format of the yaxis ".($index+1)." is incorrect. Please enter a correct format: Min, Max, increments.\n";
+            if($graph_yaxis != "") {
+                if (sizeof($param_vars) != "3") {
+                    $error .= "The format of the yaxis " . ($index + 1) . " is incorrect. Please enter a correct format: Min, Max, increments.\n";
+                }
             }
         }
 
@@ -44,10 +52,12 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
                 $graph_parameters = explode("\n", $graph_parameters);
                 foreach ($graph_parameters as $param) {
                     $param_vars = preg_split("/[;,]+/", $param);
-                    if (sizeof($param_vars) != "3" && $param != "") {
-                        $error .= "The format of the parameters " . ($index + 1) . " is incorrect. Please enter a correct format: [redcap_var],my text, #000000.\n";
-                    }else if (strpos($param_vars[0], '[') === false || strpos($param_vars[0], ']') === false) {
-                        $error .= "The format of the parameter variable ".$param_vars[0]." on " . ($index + 1) . " is incorrect. Please enter a correct format: [redcap_var],my text, #000000.\n";
+                    if($param != "") {
+                        if (sizeof($param_vars) != "3") {
+                            $error .= "The format of the parameters " . ($index + 1) . " is incorrect. Please enter a correct format: [redcap_var],my text, #000000.\n";
+                        } else if (strpos($param_vars[0], '[') === false || strpos($param_vars[0], ']') === false) {
+                            $error .= "The format of the parameter variable " . $param_vars[0] . " on " . ($index + 1) . " is incorrect. Please enter a correct format: [redcap_var],my text, #000000.\n";
+                        }
                     }
                 }
             }
@@ -95,9 +105,11 @@ class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModu
                 $value = $data[$record]['repeat_instances'][$event_id][''][$repeat_instance][$var_name];
             }
 
-            array_push($all_data_array, $value);
-            array_push($graph_text, trim($param_vars[1]));
-            array_push($graph_color, trim(strtolower($param_vars[2])));
+            if($value != ""){
+                array_push($all_data_array, $value);
+                array_push($graph_text, trim($param_vars[1]));
+                array_push($graph_color, trim(strtolower($param_vars[2])));
+            }
         }
 
         if(sizeof($all_data_array) > 0) {
