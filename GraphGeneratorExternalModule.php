@@ -8,6 +8,13 @@ require_once ('jpgraph/jpgraph.php');
 require_once ('jpgraph/jpgraph_bar.php');
 require_once ('jpgraph/jpgraph_line.php');
 
+// This works arounds an issue caused by JpGraph taking over the exception handler and not properly handling
+// Throwables that aren't Exceptions (like the common ArgumentCountError when switching to PHP7).
+$jpGraphExceptionHandler = set_exception_handler(function(\Throwable $t) use (&$jpGraphExceptionHandler){
+    $t = new \Exception($t->getMessage(), 0, $t);
+    $jpGraphExceptionHandler($t);
+});
+
 class GraphGeneratorExternalModule extends \ExternalModules\AbstractExternalModule{
 
     public function __construct(){
